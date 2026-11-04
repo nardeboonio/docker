@@ -1,7 +1,7 @@
 name: Publish the image
 
 # Every three hours the latest stable release of Nardeboon gets its image, on
-# GitHub's registry and on Docker Hub, if it doesn't have one yet; on a push
+# Docker Hub and on GitHub's registry, where it doesn't have one yet; on a push
 # or by hand, it's built again (by hand, any version).
 on:
   schedule:
@@ -24,7 +24,7 @@ concurrency:
 
 env:
   GHCR_IMAGE: ghcr.io/nardeboonio/nardeboon
-  HUB_IMAGE: docker.io/nardeboonio/nardeboon
+  HUB_IMAGE: docker.io/nardeboonhq/nardeboon
 
 jobs:
   publish:
@@ -53,7 +53,7 @@ jobs:
       - uses: docker/login-action@v3
         if: steps.hub.outputs.on == 'true'
         with:
-          username: nardeboonio
+          username: nardeboonhq
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Which version
@@ -61,6 +61,7 @@ jobs:
         env:
           WANTED: ${{ inputs.version }}
           EVENT: ${{ github.event_name }}
+          HUB: ${{ steps.hub.outputs.on }}
         run: |
           set -euo pipefail
           latest=$(curl -fsSL https://pkgs.nardeboon.io/releases/stable.json | jq -r .release | base64 -d | jq -r .version)
@@ -68,7 +69,8 @@ jobs:
           case "$version" in "" | *[!0-9A-Za-z.~-]*) echo "not a version: $version" >&2; exit 1 ;; esac
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "latest=$([ "$version" = "$latest" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          if [ "$EVENT" = schedule ] && docker manifest inspect "$GHCR_IMAGE:$version" >/dev/null 2>&1; then
+          has() { docker manifest inspect "$1:$version" >/dev/null 2>&1; }
+          if [ "$EVENT" = schedule ] && has "$GHCR_IMAGE" && { [ "$HUB" != true ] || has "$HUB_IMAGE"; }; then
             echo "build=false" >> "$GITHUB_OUTPUT"
             echo "$version has its image already"
           else

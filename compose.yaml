@@ -2,7 +2,7 @@
 # your dashboard.
 services:
   nardeboon:
-    image: ghcr.io/nardeboonio/nardeboon:latest
+    image: nardeboonhq/nardeboon:latest # or ghcr.io/nardeboonio/nardeboon:latest
     container_name: nardeboon
     hostname: my-server # the device's name in your network
     environment:
