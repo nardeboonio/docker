@@ -9,12 +9,10 @@ docker run -d --name nardeboon \
   -v nardeboon:/var/lib/nardeboon \
   -e NB_AUTH_KEY=nbk-… \
   --restart unless-stopped \
-  nardeboonio/nardeboon:latest
+  ghcr.io/nardeboonio/nardeboon:latest
 ```
 
 Get an auth key from your dashboard (**Devices → Add device**); it's needed only the first time, since the node keeps its keys in the `nardeboon` volume. The device appears in your network as `my-server`.
-
-The same image is on GitHub's registry: `ghcr.io/nardeboonio/nardeboon:latest`.
 
 ## Settings
 
@@ -39,14 +37,14 @@ docker run -d --name nardeboon --network host \
   -v nardeboon:/var/lib/nardeboon \
   -e NB_AUTH_KEY=nbk-… -e NB_UP_ARGS=--advertise-exit-node \
   --restart unless-stopped \
-  nardeboonio/nardeboon:latest
+  ghcr.io/nardeboonio/nardeboon:latest
 ```
 
 Then approve it in your dashboard. [compose.yaml](compose.yaml) has the same for Docker Compose.
 
 ## Versions
 
-`latest` is the latest stable release, and each release has its own tag (`nardeboonio/nardeboon:0.1.67`). New releases get their image within a few hours. The node also updates itself as your network's settings say; a container made anew starts from its image's version.
+`latest` is the latest stable release, and each release has its own tag (`ghcr.io/nardeboonio/nardeboon:0.1.67`). New releases get their image within a few hours. The node also updates itself as your network's settings say; a container made anew starts from its image's version.
 
 The image is built here from Nardeboon's signed packages (`pkgs.nardeboon.io`), for amd64 and arm64. Nardeboon itself isn't open source: this repository holds only the image's recipe.
 
@@ -62,7 +60,7 @@ Documentation: [nardeboon.io/docs](https://nardeboon.io/docs).
 docker run -d --name nardeboon --hostname my-server \
   --cap-add NET_ADMIN --device /dev/net/tun \
   -v nardeboon:/var/lib/nardeboon -e NB_AUTH_KEY=nbk-… \
-  --restart unless-stopped nardeboonio/nardeboon:latest
+  --restart unless-stopped ghcr.io/nardeboonio/nardeboon:latest
 ```
 
-کلید auth را از داشبورد بگیرید (**دستگاه‌ها ← افزودن دستگاه**). فقط بار اول لازم است. همین image روی رجیستری گیت‌هاب هم هست: `ghcr.io/nardeboonio/nardeboon:latest`.
+کلید auth را از داشبورد بگیرید (**دستگاه‌ها ← افزودن دستگاه**). فقط بار اول لازم است.

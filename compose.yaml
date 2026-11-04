@@ -1,9 +1,8 @@
 # Nardeboon in Docker Compose: `docker compose up -d`, then see the device in
-# your dashboard. The image is on Docker Hub (nardeboonio/nardeboon) and on
-# GitHub's registry (ghcr.io/nardeboonio/nardeboon), the same either way.
+# your dashboard.
 services:
   nardeboon:
-    image: nardeboonio/nardeboon:latest
+    image: ghcr.io/nardeboonio/nardeboon:latest
     container_name: nardeboon
     hostname: my-server # the device's name in your network
     environment:
