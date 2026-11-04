@@ -7,8 +7,8 @@
 #   NB_ACCEPT_DNS   point the container's DNS at Nardeboon (default: false)
 #   NB_UP_ARGS      more for `nardeboon up`, e.g. --advertise-exit-node
 #   NB_DAEMON_ARGS  more for nardeboond, e.g. --log-level debug
-#   NB_RELAY_PORT   only relay, on this port: UDP on it and the next one up,
-#                   TCP on it (its front door); publish the three as they are
+#   NB_RELAY_PORT   only relay: UDP on this port and the next one up, TCP (its
+#                   front door) on the one after; publish the three as they are
 #   NB_ADDRESSES    the host's public addresses, comma-separated, for peers:
 #                   where it has more than one, or a control plane runs on it
 set -eu
@@ -30,11 +30,13 @@ if [ -n "${NB_RELAY_PORT:-}" ]; then
 		exit 2
 	fi
 	case "$NB_RELAY_PORT" in *[!0-9]*) port=0 ;; *) port=$NB_RELAY_PORT ;; esac
-	if [ "$port" -lt 1024 ] || [ "$port" -gt 65534 ]; then
-		echo "nardeboon: NB_RELAY_PORT is a port from 1024 to 65534, its next one up free too" >&2
+	if [ "$port" -lt 1024 ] || [ "$port" -gt 65533 ]; then
+		echo "nardeboon: NB_RELAY_PORT is a port from 1024 to 65533, the two after it free too" >&2
 		exit 2
 	fi
-	set -- --relay-only --port "$port" --dco-port "$((port + 1))" --front-port "$port" "$@"
+	# Three numbers, not two: peers keep a relay's addresses by address and
+	# port alone, so a front door on nb-udp's number would take its traffic.
+	set -- --relay-only --port "$port" --dco-port "$((port + 1))" --front-port "$((port + 2))" "$@"
 fi
 
 connect() {

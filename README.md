@@ -48,11 +48,11 @@ Then approve it in your dashboard. [compose.yaml](compose.yaml) has the same for
 
 ## As a relay
 
-A relay only passes traffic on, so it needs nothing of the host: no `NET_ADMIN`, no `/dev/net/tun`, not its network. `NB_RELAY_PORT` (Nardeboon 0.1.68 on) runs it so, on UDP at that port and the next one up, and TCP at that port; publish the three as they are:
+A relay only passes traffic on, so it needs nothing of the host: no `NET_ADMIN`, no `/dev/net/tun`, not its network. `NB_RELAY_PORT` (Nardeboon 0.1.68 on) runs it so: UDP at that port and the next one up, and TCP at the one after; publish the three as they are:
 
 ```sh
 docker run -d --name nardeboon-relay --hostname relay-de \
-  -p 28913:28913/udp -p 28914:28914/udp -p 28913:28913/tcp \
+  -p 28913:28913/udp -p 28914:28914/udp -p 28915:28915/tcp \
   -v nardeboon-relay:/var/lib/nardeboon \
   -e NB_RELAY_PORT=28913 -e NB_AUTH_KEY=nbk-… \
   --restart unless-stopped \
