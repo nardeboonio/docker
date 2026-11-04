@@ -1,0 +1,40 @@
+name: Docker Hub's page
+
+# The README is also the image's page on Docker Hub, sent again whenever it
+# changes; its relative links are made whole, since there they'd lead nowhere.
+on:
+  push:
+    branches: [main]
+    paths: [README.md, .github/workflows/description.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  description:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: To Docker Hub
+        env:
+          HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          BASE: https://github.com/${{ github.repository }}/blob/main/
+        run: |
+          set -euo pipefail
+          if [ -z "$HUB_TOKEN" ]; then
+            echo "::notice::DOCKERHUB_TOKEN isn't set"
+            exit 0
+          fi
+          jwt=$(jq -n --arg p "$HUB_TOKEN" '{username: "nardeboonhq", password: $p}' |
+            curl -fsS -H "Content-Type: application/json" --data-binary @- https://hub.docker.com/v2/users/login |
+            jq -r .token)
+          echo "::add-mask::$jwt"
+          sed -E "s|\]\(([^):#]+)\)|](${BASE}\1)|g" README.md > page.md
+          jq -n --rawfile full page.md \
+            --arg short "Nardeboon's node in a container: a server, a NAS or any Linux host joins your network." \
+            '{full_description: $full, description: $short}' |
+            curl -fsS -X PATCH -H "Authorization: Bearer $jwt" -H "Content-Type: application/json" \
+              --data-binary @- https://hub.docker.com/v2/repositories/nardeboonhq/nardeboon/ > /dev/null
+          echo "Docker Hub's page has the README"
