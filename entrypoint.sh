@@ -7,7 +7,25 @@
 #   NB_ACCEPT_DNS   point the container's DNS at Nardeboon (default: false)
 #   NB_UP_ARGS      more for `nardeboon up`, e.g. --advertise-exit-node
 #   NB_DAEMON_ARGS  more for nardeboond, e.g. --log-level debug
+#   NB_RELAY_PORT   only relay, on this port: UDP on it and the next one up,
+#                   TCP on it (its front door); publish the three as they are
 set -eu
+
+if [ -n "${NB_RELAY_PORT:-}" ]; then
+	# A relay needs nothing of the host: no NET_ADMIN, no /dev/net/tun, not
+	# its network. Peers reach it where its ports are published, which must
+	# be the very ports it listens on.
+	if ! nardeboond -h 2>&1 | grep -q -- -relay-only; then
+		echo "nardeboon: NB_RELAY_PORT needs Nardeboon 0.1.68 or newer in the image" >&2
+		exit 2
+	fi
+	case "$NB_RELAY_PORT" in *[!0-9]*) port=0 ;; *) port=$NB_RELAY_PORT ;; esac
+	if [ "$port" -lt 1024 ] || [ "$port" -gt 65534 ]; then
+		echo "nardeboon: NB_RELAY_PORT is a port from 1024 to 65534, its next one up free too" >&2
+		exit 2
+	fi
+	set -- --relay-only --port "$port" --dco-port "$((port + 1))" --front-port "$port" "$@"
+fi
 
 connect() {
 	# The node answers once it's up; `status` says how it stands in its exit

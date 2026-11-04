@@ -25,6 +25,7 @@ The same image is on GitHub's registry too, as `ghcr.io/nardeboonio/nardeboon`.
 | `NB_ACCEPT_DNS` | `true` to point the container's DNS at Nardeboon (default: `false`). |
 | `NB_UP_ARGS` | More for `nardeboon up`, e.g. `--advertise-exit-node` or `--advertise-routes=10.0.0.0/24`. |
 | `NB_DAEMON_ARGS` | More for the node itself, e.g. `--log-level debug`. |
+| `NB_RELAY_PORT` | Only relay, on this port (see below). |
 
 The CLI is in the container: `docker exec nardeboon nardeboon status`.
 
@@ -43,6 +44,21 @@ docker run -d --name nardeboon --network host \
 ```
 
 Then approve it in your dashboard. [compose.yaml](compose.yaml) has the same for Docker Compose.
+
+## As a relay
+
+A relay only passes traffic on, so it needs nothing of the host: no `NET_ADMIN`, no `/dev/net/tun`, not its network. `NB_RELAY_PORT` (Nardeboon 0.1.68 on) runs it so, on UDP at that port and the next one up, and TCP at that port; publish the three as they are:
+
+```sh
+docker run -d --name nardeboon-relay --hostname relay-de \
+  -p 28913:28913/udp -p 28914:28914/udp -p 28913:28913/tcp \
+  -v nardeboon-relay:/var/lib/nardeboon \
+  -e NB_RELAY_PORT=28913 -e NB_AUTH_KEY=nbk-… \
+  --restart unless-stopped \
+  nardeboonhq/nardeboon:latest
+```
+
+The key is a relay key, from Nardeboon; the admin panel gives the whole command, with ports of the relay's own.
 
 ## Versions
 
