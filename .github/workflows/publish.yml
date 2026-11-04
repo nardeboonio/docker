@@ -2,7 +2,7 @@ name: Publish the image
 
 # Every three hours the latest stable release of Nardeboon gets its image, on
 # Docker Hub and on GitHub's registry, where it doesn't have one yet; on a push
-# or by hand, it's built again (by hand, any version).
+# that changes the image, or by hand, it's built again (by hand, any version).
 on:
   schedule:
     - cron: "23 */3 * * *"
@@ -13,6 +13,7 @@ on:
         required: false
   push:
     branches: [main]
+    paths-ignore: [README.md, compose.yaml, .github/workflows/description.yml]
 
 permissions:
   contents: read
