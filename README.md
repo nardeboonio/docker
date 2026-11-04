@@ -26,6 +26,7 @@ The same image is on GitHub's registry too, as `ghcr.io/nardeboonio/nardeboon`.
 | `NB_UP_ARGS` | More for `nardeboon up`, e.g. `--advertise-exit-node` or `--advertise-routes=10.0.0.0/24`. |
 | `NB_DAEMON_ARGS` | More for the node itself, e.g. `--log-level debug`. |
 | `NB_RELAY_PORT` | Only relay, on this port (see below). |
+| `NB_ADDRESSES` | The host's public addresses, comma-separated, where it has more than one. |
 
 The CLI is in the container: `docker exec nardeboon nardeboon status`.
 
@@ -59,6 +60,8 @@ docker run -d --name nardeboon-relay --hostname relay-de \
 ```
 
 The key is a relay key, from Nardeboon; the admin panel gives the whole command, with ports of the relay's own.
+
+On a server with more than one public address, give them all, so peers can use each: `-e NB_ADDRESSES=203.0.113.7,198.51.100.9`. The node sees only the container's own address, and reaches the internet from one of the host's.
 
 ## Versions
 

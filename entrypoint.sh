@@ -9,7 +9,17 @@
 #   NB_DAEMON_ARGS  more for nardeboond, e.g. --log-level debug
 #   NB_RELAY_PORT   only relay, on this port: UDP on it and the next one up,
 #                   TCP on it (its front door); publish the three as they are
+#   NB_ADDRESSES    the host's public addresses, comma-separated, for peers:
+#                   where it has more than one, or a control plane runs on it
 set -eu
+
+if [ -n "${NB_ADDRESSES:-}" ]; then
+	if ! nardeboond -h 2>&1 | grep -q -- -addresses; then
+		echo "nardeboon: NB_ADDRESSES needs a newer Nardeboon in the image" >&2
+		exit 2
+	fi
+	set -- --addresses "$NB_ADDRESSES" "$@"
+fi
 
 if [ -n "${NB_RELAY_PORT:-}" ]; then
 	# A relay needs nothing of the host: no NET_ADMIN, no /dev/net/tun, not
