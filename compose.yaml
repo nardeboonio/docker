@@ -1,0 +1,23 @@
+# Nardeboon in Docker Compose: `docker compose up -d`, then see the device in
+# your dashboard. The image is on Docker Hub (nardeboonio/nardeboon) and on
+# GitHub's registry (ghcr.io/nardeboonio/nardeboon), the same either way.
+services:
+  nardeboon:
+    image: nardeboonio/nardeboon:latest
+    container_name: nardeboon
+    hostname: my-server # the device's name in your network
+    environment:
+      NB_AUTH_KEY: nbk-… # an auth key from your dashboard (Devices, Add device), needed only the first time
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - nardeboon:/var/lib/nardeboon
+    restart: unless-stopped
+    # As an exit node or subnet router, it uses the host's network:
+    # network_mode: host
+    # environment: NB_UP_ARGS: "--advertise-exit-node" (or --advertise-routes=10.0.0.0/24)
+
+volumes:
+  nardeboon:
